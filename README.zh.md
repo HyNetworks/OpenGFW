@@ -1,16 +1,11 @@
 # ![OpenGFW](docs/logo.png)
 
-[![Quality check status](https://github.com/apernet/OpenGFW/actions/workflows/check.yaml/badge.svg)](https://github.com/apernet/OpenGFW/actions/workflows/check.yaml)
 [![License][1]][2]
 
 [1]: https://img.shields.io/badge/License-MPL_2.0-brightgreen.svg
 [2]: LICENSE
 
 OpenGFW 是一个 Linux 上灵活、易用、开源的 DIY [GFW](https://zh.wikipedia.org/wiki/%E9%98%B2%E7%81%AB%E9%95%BF%E5%9F%8E) 实现，并且在许多方面比真正的 GFW 更强大。为何让那些掌权者独享乐趣？是时候把权力归还给人民，人人有墙建了。立即安装可以部署在家用路由器上的网络主权 - 你也能是老大哥。
-
-**文档网站： https://gfw.dev/**
-
-Telegram 群组： https://t.me/OpGFW
 
 > [!CAUTION]
 > 本项目仍处于早期开发阶段。测试时自行承担风险。我们正在寻求贡献者一起完善本项目。
