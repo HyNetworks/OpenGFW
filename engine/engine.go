@@ -3,6 +3,7 @@ package engine
 import (
 	"context"
 	"runtime"
+	"sync"
 
 	"github.com/apernet/OpenGFW/io"
 	"github.com/apernet/OpenGFW/ruleset"
@@ -58,11 +59,15 @@ func (e *engine) UpdateRuleset(r ruleset.Ruleset) error {
 
 func (e *engine) Run(ctx context.Context) error {
 	ioCtx, ioCancel := context.WithCancel(ctx)
-	defer ioCancel() // Stop workers & IO
+	var workers sync.WaitGroup
+	defer func() {
+		ioCancel()
+		workers.Wait()
+	}()
 
 	// Start workers
 	for _, w := range e.workers {
-		go w.Run(ioCtx)
+		workers.Go(func() { w.Run(ioCtx) })
 	}
 
 	// Register IO callback

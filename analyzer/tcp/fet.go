@@ -1,6 +1,10 @@
 package tcp
 
-import "github.com/apernet/OpenGFW/analyzer"
+import (
+	"math/bits"
+
+	"github.com/apernet/OpenGFW/analyzer"
+)
 
 var _ analyzer.TCPAnalyzer = (*FETAnalyzer)(nil)
 
@@ -61,15 +65,6 @@ func (s *fetStream) Close(limited bool) *analyzer.PropUpdate {
 	return nil
 }
 
-func popCount(b byte) int {
-	count := 0
-	for b != 0 {
-		count += int(b & 1)
-		b >>= 1
-	}
-	return count
-}
-
 // averagePopCount returns the average popcount of the given bytes.
 // This is the "Ex1" metric in the paper.
 func averagePopCount(bytes []byte) float32 {
@@ -78,7 +73,7 @@ func averagePopCount(bytes []byte) float32 {
 	}
 	total := 0
 	for _, b := range bytes {
-		total += popCount(b)
+		total += bits.OnesCount8(b)
 	}
 	return float32(total) / float32(len(bytes))
 }
@@ -125,16 +120,11 @@ func contiguousPrintable(bytes []byte) int {
 		if isPrintable(bytes[i]) {
 			current++
 		} else {
-			if current > maxCount {
-				maxCount = current
-			}
+			maxCount = max(maxCount, current)
 			current = 0
 		}
 	}
-	if current > maxCount {
-		maxCount = current
-	}
-	return maxCount
+	return max(maxCount, current)
 }
 
 // isTLSorHTTP returns true if the given bytes look like TLS or HTTP.

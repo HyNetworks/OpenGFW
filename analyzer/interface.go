@@ -20,9 +20,9 @@ type Analyzer interface {
 }
 
 type Logger interface {
-	Debugf(format string, args ...interface{})
-	Infof(format string, args ...interface{})
-	Errorf(format string, args ...interface{})
+	Debugf(format string, args ...any)
+	Infof(format string, args ...any)
+	Errorf(format string, args ...any)
 }
 
 type TCPAnalyzer interface {
@@ -82,19 +82,19 @@ type UDPStream interface {
 }
 
 type (
-	PropMap         map[string]interface{}
+	PropMap         map[string]any
 	CombinedPropMap map[string]PropMap
 )
 
 // Get returns the value of the property with the given key.
 // The key can be a nested key, e.g. "foo.bar.baz".
 // Returns nil if the key does not exist.
-func (m PropMap) Get(key string) interface{} {
+func (m PropMap) Get(key string) any {
 	keys := strings.Split(key, ".")
 	if len(keys) == 0 {
 		return nil
 	}
-	var current interface{} = m
+	var current any = m
 	for _, k := range keys {
 		currentMap, ok := current.(PropMap)
 		if !ok {
@@ -108,7 +108,7 @@ func (m PropMap) Get(key string) interface{} {
 // Get returns the value of the property with the given analyzer & key.
 // The key can be a nested key, e.g. "foo.bar.baz".
 // Returns nil if the key does not exist.
-func (cm CombinedPropMap) Get(an string, key string) interface{} {
+func (cm CombinedPropMap) Get(an string, key string) any {
 	m, ok := cm[an]
 	if !ok {
 		return nil

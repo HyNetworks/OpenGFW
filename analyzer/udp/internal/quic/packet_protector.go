@@ -64,7 +64,7 @@ func (pp *PacketProtector) UnProtect(packet []byte, pnOffset, pnMax int64) ([]by
 
 	pnLen := packet[0]&0x3 + 1
 	pn := int64(0)
-	for i := uint8(0); i < pnLen; i++ {
+	for i := range pnLen {
 		packet[pnOffset:][i] ^= mask[1+i]
 		pn = (pn << 8) | int64(packet[pnOffset:][i])
 	}

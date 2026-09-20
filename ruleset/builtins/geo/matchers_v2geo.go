@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net"
 	"regexp"
-	"sort"
+	"slices"
 	"strings"
 
 	"github.com/apernet/OpenGFW/ruleset/builtins/geo/v2geo"
@@ -80,11 +80,11 @@ func newGeoIPMatcher(list *v2geo.GeoIP) (*geoipMatcher, error) {
 		}
 	}
 	// Sort the IPNets, so we can do binary search later.
-	sort.Slice(n4, func(i, j int) bool {
-		return bytes.Compare(n4[i].IP, n4[j].IP) < 0
+	slices.SortFunc(n4, func(a, b *net.IPNet) int {
+		return bytes.Compare(a.IP, b.IP)
 	})
-	sort.Slice(n6, func(i, j int) bool {
-		return bytes.Compare(n6[i].IP, n6[j].IP) < 0
+	slices.SortFunc(n6, func(a, b *net.IPNet) int {
+		return bytes.Compare(a.IP, b.IP)
 	})
 	return &geoipMatcher{
 		N4:      n4,

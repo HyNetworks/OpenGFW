@@ -152,16 +152,14 @@ func (s *httpStream) parseHeaders(buf *utils.ByteBuffer) (utils.LSMAction, analy
 	}
 	headers = headers[:len(headers)-4] // Strip \r\n\r\n
 	headerMap := make(analyzer.PropMap)
-	for _, line := range bytes.Split(headers, []byte("\r\n")) {
-		fields := bytes.SplitN(line, []byte(":"), 2)
-		if len(fields) != 2 {
+	for line := range bytes.SplitSeq(headers, []byte("\r\n")) {
+		key, value, ok := bytes.Cut(line, []byte(":"))
+		if !ok {
 			// Invalid header
 			return utils.LSMActionCancel, nil
 		}
-		key := string(bytes.TrimSpace(fields[0]))
-		value := string(bytes.TrimSpace(fields[1]))
 		// Normalize header keys to lowercase
-		headerMap[strings.ToLower(key)] = value
+		headerMap[strings.ToLower(string(bytes.TrimSpace(key)))] = string(bytes.TrimSpace(value))
 	}
 	return utils.LSMActionNext, headerMap
 }

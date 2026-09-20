@@ -33,8 +33,8 @@ type ExprRule struct {
 }
 
 type ModifierEntry struct {
-	Name string                 `yaml:"name"`
-	Args map[string]interface{} `yaml:"args"`
+	Name string         `yaml:"name"`
+	Args map[string]any `yaml:"args"`
 }
 
 func ExprRulesFromYAML(file string) ([]ExprRule, error) {
@@ -187,8 +187,8 @@ func CompileExprRules(rules []ExprRule, ans []analyzer.Analyzer, mods []modifier
 	}, nil
 }
 
-func streamInfoToExprEnv(info StreamInfo) map[string]interface{} {
-	m := map[string]interface{}{
+func streamInfoToExprEnv(info StreamInfo) map[string]any {
+	m := map[string]any{
 		"id":    info.ID,
 		"proto": info.Protocol.String(),
 		"ip": map[string]string{
