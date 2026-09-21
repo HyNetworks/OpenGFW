@@ -1,3 +1,8 @@
+> Earlier this year, we removed the OpenGFW repository from GitHub. This decision was made primarily because we discovered that Geedge Networks, a company with close ties to the Chinese government that sells censorship solutions to governments around the world, was plagiarizing OpenGFW's code and incorporating it into its products.
+> OpenGFW was created for purposes such as network research, ad blocking, and parental controls. It was never intended to enable or assist state censorship. Seeing the project used in this way was fundamentally at odds with why we built and released it.
+> After further internal discussion and requests from the community, we have decided to make the repository publicly available again for the benefit of the broader community.
+> For now, we do not plan to actively continue developing OpenGFW ourselves. Instead, we intend to focus more of our efforts on Hysteria and other upcoming anti-censorship projects. However, if members of the community would like to continue developing OpenGFW, they are more than welcome to do so. We will keep the repository available, accept pull requests, and publish new releases as appropriate. Thank you to everyone in the community who has supported our projects and shared their feedback with us.
+
 # ![OpenGFW](docs/logo.png)
 
 [![License][1]][2]
