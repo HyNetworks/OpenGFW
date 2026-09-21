@@ -24,7 +24,7 @@ func (m *DNSModifier) Name() string {
 	return "dns"
 }
 
-func (m *DNSModifier) New(args map[string]interface{}) (modifier.Instance, error) {
+func (m *DNSModifier) New(args map[string]any) (modifier.Instance, error) {
 	i := &dnsModifierInstance{}
 	aStr, ok := args["a"].(string)
 	if ok {

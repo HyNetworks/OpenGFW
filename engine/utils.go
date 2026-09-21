@@ -10,15 +10,15 @@ type analyzerLogger struct {
 	Logger   Logger
 }
 
-func (l *analyzerLogger) Debugf(format string, args ...interface{}) {
+func (l *analyzerLogger) Debugf(format string, args ...any) {
 	l.Logger.AnalyzerDebugf(l.StreamID, l.Name, format, args...)
 }
 
-func (l *analyzerLogger) Infof(format string, args ...interface{}) {
+func (l *analyzerLogger) Infof(format string, args ...any) {
 	l.Logger.AnalyzerInfof(l.StreamID, l.Name, format, args...)
 }
 
-func (l *analyzerLogger) Errorf(format string, args ...interface{}) {
+func (l *analyzerLogger) Errorf(format string, args ...any) {
 	l.Logger.AnalyzerErrorf(l.StreamID, l.Name, format, args...)
 }
 

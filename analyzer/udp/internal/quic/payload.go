@@ -2,11 +2,12 @@ package quic
 
 import (
 	"bytes"
+	"cmp"
 	"crypto"
 	"errors"
 	"fmt"
 	"io"
-	"sort"
+	"slices"
 
 	"github.com/quic-go/quic-go/quicvarint"
 	"golang.org/x/crypto/hkdf"
@@ -106,7 +107,7 @@ func assembleCryptoFrames(frames []cryptoFrame) []byte {
 		return frames[0].Data
 	}
 	// sort the frames by offset
-	sort.Slice(frames, func(i, j int) bool { return frames[i].Offset < frames[j].Offset })
+	slices.SortFunc(frames, func(a, b cryptoFrame) int { return cmp.Compare(a.Offset, b.Offset) })
 	// check if the frames are contiguous
 	for i := 1; i < len(frames); i++ {
 		if frames[i].Offset != frames[i-1].Offset+int64(len(frames[i-1].Data)) {

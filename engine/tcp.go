@@ -191,10 +191,7 @@ func (s *tcpStream) feedEntry(entry *tcpStreamEntry, rev, start, end bool, skip 
 	if !entry.HasLimit {
 		update, done = entry.Stream.Feed(rev, start, end, skip, data)
 	} else {
-		qData := data
-		if len(qData) > entry.Quota {
-			qData = qData[:entry.Quota]
-		}
+		qData := data[:min(len(data), entry.Quota)]
 		update, done = entry.Stream.Feed(rev, start, end, skip, qData)
 		entry.Quota -= len(qData)
 		if entry.Quota <= 0 {

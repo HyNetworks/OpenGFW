@@ -43,7 +43,7 @@ type Logger interface {
 
 	ModifyError(info ruleset.StreamInfo, err error)
 
-	AnalyzerDebugf(streamID int64, name string, format string, args ...interface{})
-	AnalyzerInfof(streamID int64, name string, format string, args ...interface{})
-	AnalyzerErrorf(streamID int64, name string, format string, args ...interface{})
+	AnalyzerDebugf(streamID int64, name string, format string, args ...any)
+	AnalyzerInfof(streamID int64, name string, format string, args ...any)
+	AnalyzerErrorf(streamID int64, name string, format string, args ...any)
 }

@@ -382,21 +382,21 @@ func (l *engineLogger) ModifyError(info ruleset.StreamInfo, err error) {
 		zap.Error(err))
 }
 
-func (l *engineLogger) AnalyzerDebugf(streamID int64, name string, format string, args ...interface{}) {
+func (l *engineLogger) AnalyzerDebugf(streamID int64, name string, format string, args ...any) {
 	logger.Debug("analyzer debug message",
 		zap.Int64("id", streamID),
 		zap.String("name", name),
 		zap.String("msg", fmt.Sprintf(format, args...)))
 }
 
-func (l *engineLogger) AnalyzerInfof(streamID int64, name string, format string, args ...interface{}) {
+func (l *engineLogger) AnalyzerInfof(streamID int64, name string, format string, args ...any) {
 	logger.Info("analyzer info message",
 		zap.Int64("id", streamID),
 		zap.String("name", name),
 		zap.String("msg", fmt.Sprintf(format, args...)))
 }
 
-func (l *engineLogger) AnalyzerErrorf(streamID int64, name string, format string, args ...interface{}) {
+func (l *engineLogger) AnalyzerErrorf(streamID int64, name string, format string, args ...any) {
 	logger.Error("analyzer error message",
 		zap.Int64("id", streamID),
 		zap.String("name", name),

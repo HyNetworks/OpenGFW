@@ -1,6 +1,6 @@
 module github.com/apernet/OpenGFW
 
-go 1.21
+go 1.27
 
 require (
 	github.com/bwmarrin/snowflake v0.3.0

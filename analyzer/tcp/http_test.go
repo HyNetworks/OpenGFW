@@ -19,6 +19,10 @@ func TestHTTPParsing_Request(t *testing.T) {
 		"PUT /world HTTP/1.1\r\nContent-Length: 4\r\n\r\nbody": {
 			"method": "PUT", "path": "/world", "version": "HTTP/1.1", "headers": analyzer.PropMap{"content-length": "4"},
 		},
+		"GET /example HTTP/1.1\r\nHost: example.com\r\nX-Request-ID: a:b\r\n\r\n": {
+			"method": "GET", "path": "/example", "version": "HTTP/1.1",
+			"headers": analyzer.PropMap{"host": "example.com", "x-request-id": "a:b"},
+		},
 		"DELETE /goodbye HTTP/2.0\r\n": {
 			"method": "DELETE", "path": "/goodbye", "version": "HTTP/2.0",
 		},
