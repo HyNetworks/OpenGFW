@@ -25,11 +25,16 @@ import (
 
 // ExprRule is the external representation of an expression rule.
 type ExprRule struct {
-	Name     string        `yaml:"name"`
-	Action   string        `yaml:"action"`
-	Log      bool          `yaml:"log"`
-	Modifier ModifierEntry `yaml:"modifier"`
-	Expr     string        `yaml:"expr"`
+	Name         string        `yaml:"name"`
+	Action       string        `yaml:"action"`
+	ActionParams *ActionParams `yaml:"actionParams,omitempty"`
+	Log          bool          `yaml:"log"`
+	Modifier     ModifierEntry `yaml:"modifier"`
+	Expr         string        `yaml:"expr"`
+}
+
+type ActionParams struct {
+	DropRate *int `yaml:"dropRate,omitempty"`
 }
 
 type ModifierEntry struct {
@@ -91,7 +96,7 @@ func (r *exprRuleset) Match(info StreamInfo) MatchResult {
 	}
 	// No match
 	return MatchResult{
-		Action: ActionMaybe,
+		Action: Action{Type: ActionMaybe},
 	}
 }
 
@@ -111,11 +116,11 @@ func CompileExprRules(rules []ExprRule, ans []analyzer.Analyzer, mods []modifier
 		}
 		var action *Action
 		if rule.Action != "" {
-			a, ok := actionStringToAction(rule.Action)
+			a, ok := actionStringToActionType(rule.Action)
 			if !ok {
 				return nil, fmt.Errorf("rule %q has invalid action %q", rule.Name, rule.Action)
 			}
-			action = &a
+			action = &Action{Type: a, Params: rule.ActionParams}
 		}
 		visitor := &idVisitor{Variables: make(map[string]bool), Identifiers: make(map[string]bool)}
 		patcher := &idPatcher{FuncMap: funcMap}
@@ -162,7 +167,7 @@ func CompileExprRules(rules []ExprRule, ans []analyzer.Analyzer, mods []modifier
 			Log:     rule.Log,
 			Program: program,
 		}
-		if action != nil && *action == ActionModify {
+		if action != nil && action.Type == ActionModify {
 			mod, ok := fullModMap[rule.Modifier.Name]
 			if !ok {
 				return nil, fmt.Errorf("rule %q uses unknown modifier %q", rule.Name, rule.Modifier.Name)
@@ -218,7 +223,7 @@ func isBuiltInAnalyzer(name string) bool {
 	}
 }
 
-func actionStringToAction(action string) (Action, bool) {
+func actionStringToActionType(action string) (ActionType, bool) {
 	switch strings.ToLower(action) {
 	case "allow":
 		return ActionAllow, true

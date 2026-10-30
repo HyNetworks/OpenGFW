@@ -1,6 +1,10 @@
 package engine
 
-import "github.com/apernet/OpenGFW/analyzer"
+import (
+	"math/rand/v2"
+
+	"github.com/apernet/OpenGFW/analyzer"
+)
 
 var _ analyzer.Logger = (*analyzerLogger)(nil)
 
@@ -47,4 +51,8 @@ func processPropUpdate(cpm analyzer.CombinedPropMap, name string, update *analyz
 		// Invalid update type, ignore for now
 		return false
 	}
+}
+
+func shouldDrop(rate uint8) bool {
+	return rand.IntN(100) < int(rate)
 }

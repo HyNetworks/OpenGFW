@@ -36,10 +36,12 @@ type Logger interface {
 	TCPStreamNew(workerID int, info ruleset.StreamInfo)
 	TCPStreamPropUpdate(info ruleset.StreamInfo, close bool)
 	TCPStreamAction(info ruleset.StreamInfo, action ruleset.Action, noMatch bool)
+	TCPStreamActionType(info ruleset.StreamInfo, actionType ruleset.ActionType, noMatch bool)
 
 	UDPStreamNew(workerID int, info ruleset.StreamInfo)
 	UDPStreamPropUpdate(info ruleset.StreamInfo, close bool)
 	UDPStreamAction(info ruleset.StreamInfo, action ruleset.Action, noMatch bool)
+	UDPStreamActionType(info ruleset.StreamInfo, actionType ruleset.ActionType, noMatch bool)
 
 	ModifyError(info ruleset.StreamInfo, err error)
 

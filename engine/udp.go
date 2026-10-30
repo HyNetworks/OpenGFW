@@ -203,24 +203,24 @@ func (s *udpStream) Feed(udp *layers.UDP, rev bool, uc *udpContext) {
 		// Match properties against ruleset
 		result := s.ruleset.Match(s.info)
 		action := result.Action
-		if action == ruleset.ActionModify {
+		if action.Type == ruleset.ActionModify {
 			// Call the modifier instance
 			udpMI, ok := result.ModInstance.(modifier.UDPModifierInstance)
 			if !ok {
 				// Not for UDP, fallback to maybe
 				s.logger.ModifyError(s.info, errInvalidModifier)
-				action = ruleset.ActionMaybe
+				action.Type = ruleset.ActionMaybe
 			} else {
 				var err error
 				uc.Packet, err = udpMI.Process(udp.Payload)
 				if err != nil {
 					// Modifier error, fallback to maybe
 					s.logger.ModifyError(s.info, err)
-					action = ruleset.ActionMaybe
+					action.Type = ruleset.ActionMaybe
 				}
 			}
 		}
-		if action != ruleset.ActionMaybe {
+		if action.Type != ruleset.ActionMaybe {
 			verdict, final := actionToUDPVerdict(action)
 			s.lastVerdict = verdict
 			uc.Verdict = verdict
@@ -234,7 +234,7 @@ func (s *udpStream) Feed(udp *layers.UDP, rev bool, uc *udpContext) {
 		// All entries are done but no verdict issued, accept stream
 		s.lastVerdict = udpVerdictAcceptStream
 		uc.Verdict = udpVerdictAcceptStream
-		s.logger.UDPStreamAction(s.info, ruleset.ActionAllow, true)
+		s.logger.UDPStreamActionType(s.info, ruleset.ActionAllow, true)
 	}
 }
 
@@ -281,7 +281,7 @@ func analyzersToUDPAnalyzers(ans []analyzer.Analyzer) []analyzer.UDPAnalyzer {
 }
 
 func actionToUDPVerdict(a ruleset.Action) (v udpVerdict, final bool) {
-	switch a {
+	switch a.Type {
 	case ruleset.ActionMaybe:
 		return udpVerdictAccept, false
 	case ruleset.ActionAllow:
