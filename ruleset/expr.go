@@ -120,7 +120,11 @@ func CompileExprRules(rules []ExprRule, ans []analyzer.Analyzer, mods []modifier
 			if !ok {
 				return nil, fmt.Errorf("rule %q has invalid action %q", rule.Name, rule.Action)
 			}
-			action = &Action{Type: a, Params: rule.ActionParams}
+			params, err := normalizeActionParams(&rule, a)
+			if err != nil {
+				return nil, err
+			}
+			action = &Action{Type: a, Params: params}
 		}
 		visitor := &idVisitor{Variables: make(map[string]bool), Identifiers: make(map[string]bool)}
 		patcher := &idPatcher{FuncMap: funcMap}
@@ -256,6 +260,36 @@ func modifiersToMap(mods []modifier.Modifier) map[string]modifier.Modifier {
 		modMap[m.Name()] = m
 	}
 	return modMap
+}
+
+func normalizeActionParams(rule *ExprRule, actionType ActionType) (*ActionParams, error) {
+	params := &ActionParams{}
+	if rule.ActionParams != nil {
+		*params = *rule.ActionParams
+	}
+	if actionType != ActionDrop {
+		if params.DropRate != nil {
+			return nil, fmt.Errorf(
+				"rule %q: dropRate is only valid for drop action",
+				rule.Name,
+			)
+		}
+		return params, nil
+	}
+	// dropRate defaults to 100 for backward compatibility.
+	if params.DropRate == nil {
+		rate := 100
+		params.DropRate = &rate
+	}
+	rate := *params.DropRate
+	if rate < 0 || rate > 100 {
+		return nil, fmt.Errorf(
+			"rule %q: dropRate must be between 0 and 100, got %d",
+			rule.Name,
+			rate,
+		)
+	}
+	return params, nil
 }
 
 // idVisitor is a visitor that collects all identifiers in an expression.

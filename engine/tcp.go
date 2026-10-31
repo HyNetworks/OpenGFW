@@ -166,11 +166,8 @@ func (s *tcpStream) ReassembledSG(sg reassembly.ScatterGather, ac reassembly.Ass
 		result := s.ruleset.Match(s.info)
 		action := result.Action
 		if action.Type == ruleset.ActionDrop {
-			rate := 100
-			if action.Params != nil && action.Params.DropRate != nil {
-				rate = *action.Params.DropRate
-			}
-			if rate >= 100 {
+			rate := *action.Params.DropRate
+			if rate == 100 {
 				s.lastVerdict = tcpVerdictDropStream
 				ctx.Verdict = tcpVerdictDropStream
 			} else if rate == 0 {
@@ -181,6 +178,7 @@ func (s *tcpStream) ReassembledSG(sg reassembly.ScatterGather, ac reassembly.Ass
 				s.dropRate = uint8(rate)
 				ctx.Verdict = tcpVerdictAccept
 			}
+			s.logger.TCPStreamAction(s.info, action, false)
 			// No more analyze
 			s.closeActiveEntries()
 		} else if action.Type != ruleset.ActionMaybe && action.Type != ruleset.ActionModify {
@@ -253,11 +251,9 @@ func actionToTCPVerdict(a ruleset.Action) tcpVerdict {
 	case ruleset.ActionBlock:
 		return tcpVerdictDropStream
 	case ruleset.ActionDrop:
-		rate := 100
-		if a.Params != nil && a.Params.DropRate != nil {
-			rate = *a.Params.DropRate
-		}
-		if rate >= 100 {
+		// Should never happen
+		rate := *a.Params.DropRate
+		if rate == 100 {
 			return tcpVerdictDropStream
 		}
 		return tcpVerdictAccept
