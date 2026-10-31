@@ -348,6 +348,15 @@ func (l *engineLogger) TCPStreamAction(info ruleset.StreamInfo, action ruleset.A
 		zap.Bool("noMatch", noMatch))
 }
 
+func (l *engineLogger) TCPStreamActionType(info ruleset.StreamInfo, action ruleset.ActionType, noMatch bool) {
+	logger.Info("TCP stream action",
+		zap.Int64("id", info.ID),
+		zap.String("src", info.SrcString()),
+		zap.String("dst", info.DstString()),
+		zap.String("action", action.String()),
+		zap.Bool("noMatch", noMatch))
+}
+
 func (l *engineLogger) UDPStreamNew(workerID int, info ruleset.StreamInfo) {
 	logger.Debug("new UDP stream",
 		zap.Int("workerID", workerID),
@@ -366,6 +375,15 @@ func (l *engineLogger) UDPStreamPropUpdate(info ruleset.StreamInfo, close bool) 
 }
 
 func (l *engineLogger) UDPStreamAction(info ruleset.StreamInfo, action ruleset.Action, noMatch bool) {
+	logger.Info("UDP stream action",
+		zap.Int64("id", info.ID),
+		zap.String("src", info.SrcString()),
+		zap.String("dst", info.DstString()),
+		zap.String("action", action.String()),
+		zap.Bool("noMatch", noMatch))
+}
+
+func (l *engineLogger) UDPStreamActionType(info ruleset.StreamInfo, action ruleset.ActionType, noMatch bool) {
 	logger.Info("UDP stream action",
 		zap.Int64("id", info.ID),
 		zap.String("src", info.SrcString()),

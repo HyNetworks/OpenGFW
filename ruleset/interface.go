@@ -9,12 +9,17 @@ import (
 	"github.com/apernet/OpenGFW/modifier"
 )
 
-type Action int
+type Action struct {
+	Type   ActionType
+	Params *ActionParams
+}
+
+type ActionType int
 
 const (
 	// ActionMaybe indicates that the ruleset hasn't seen anything worth blocking based on
 	// current information, but that may change if volatile fields change in the future.
-	ActionMaybe Action = iota
+	ActionMaybe ActionType = iota
 	// ActionAllow indicates that the stream should be allowed regardless of future changes.
 	ActionAllow
 	// ActionBlock indicates that the stream should be blocked.
@@ -29,7 +34,13 @@ const (
 	ActionModify
 )
 
-func (a Action) String() string {
+func (a *Action) String() string {
+	ret := a.Type.String()
+	// todo: concat parameters string
+	return ret
+}
+
+func (a ActionType) String() string {
 	switch a {
 	case ActionMaybe:
 		return "maybe"

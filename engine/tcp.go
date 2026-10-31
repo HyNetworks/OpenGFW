@@ -22,6 +22,7 @@ type tcpVerdict io.Verdict
 const (
 	tcpVerdictAccept       = tcpVerdict(io.VerdictAccept)
 	tcpVerdictAcceptStream = tcpVerdict(io.VerdictAcceptStream)
+	tcpVerdictDrop         = tcpVerdict(io.VerdictDrop)
 	tcpVerdictDropStream   = tcpVerdict(io.VerdictDropStream)
 )
 
@@ -103,6 +104,11 @@ type tcpStream struct {
 	activeEntries []*tcpStreamEntry
 	doneEntries   []*tcpStreamEntry
 	lastVerdict   tcpVerdict
+
+	// 0: probabilistic drop disabled
+	// 1-99: drop each packet with this probability
+	// 100: drop stream
+	dropRate uint8
 }
 
 type tcpStreamEntry struct {
@@ -120,6 +126,15 @@ func (s *tcpStream) Accept(tcp *layers.TCP, ci gopacket.CaptureInfo, dir reassem
 		return true
 	} else {
 		ctx := ac.(*tcpContext)
+		// Probability drop mode
+		if s.dropRate > 0 {
+			if shouldDrop(s.dropRate) {
+				ctx.Verdict = tcpVerdictDrop
+			} else {
+				ctx.Verdict = tcpVerdictAccept
+			}
+			return false
+		}
 		ctx.Verdict = s.lastVerdict
 		return false
 	}
@@ -150,7 +165,23 @@ func (s *tcpStream) ReassembledSG(sg reassembly.ScatterGather, ac reassembly.Ass
 		// Match properties against ruleset
 		result := s.ruleset.Match(s.info)
 		action := result.Action
-		if action != ruleset.ActionMaybe && action != ruleset.ActionModify {
+		if action.Type == ruleset.ActionDrop {
+			rate := *action.Params.DropRate
+			if rate == 100 {
+				s.lastVerdict = tcpVerdictDropStream
+				ctx.Verdict = tcpVerdictDropStream
+			} else if rate == 0 {
+				s.lastVerdict = tcpVerdictAcceptStream
+				ctx.Verdict = tcpVerdictAcceptStream
+			} else {
+				// Enter drop mode
+				s.dropRate = uint8(rate)
+				ctx.Verdict = tcpVerdictAccept
+			}
+			s.logger.TCPStreamAction(s.info, action, false)
+			// No more analyze
+			s.closeActiveEntries()
+		} else if action.Type != ruleset.ActionMaybe && action.Type != ruleset.ActionModify {
 			verdict := actionToTCPVerdict(action)
 			s.lastVerdict = verdict
 			ctx.Verdict = verdict
@@ -159,11 +190,11 @@ func (s *tcpStream) ReassembledSG(sg reassembly.ScatterGather, ac reassembly.Ass
 			s.closeActiveEntries()
 		}
 	}
-	if len(s.activeEntries) == 0 && ctx.Verdict == tcpVerdictAccept {
+	if len(s.activeEntries) == 0 && ctx.Verdict == tcpVerdictAccept && s.dropRate == 0 {
 		// All entries are done but no verdict issued, accept stream
 		s.lastVerdict = tcpVerdictAcceptStream
 		ctx.Verdict = tcpVerdictAcceptStream
-		s.logger.TCPStreamAction(s.info, ruleset.ActionAllow, true)
+		s.logger.TCPStreamActionType(s.info, ruleset.ActionAllow, true)
 	}
 }
 
@@ -214,11 +245,18 @@ func analyzersToTCPAnalyzers(ans []analyzer.Analyzer) []analyzer.TCPAnalyzer {
 }
 
 func actionToTCPVerdict(a ruleset.Action) tcpVerdict {
-	switch a {
+	switch a.Type {
 	case ruleset.ActionMaybe, ruleset.ActionAllow, ruleset.ActionModify:
 		return tcpVerdictAcceptStream
-	case ruleset.ActionBlock, ruleset.ActionDrop:
+	case ruleset.ActionBlock:
 		return tcpVerdictDropStream
+	case ruleset.ActionDrop:
+		// Should never happen
+		rate := *a.Params.DropRate
+		if rate == 100 {
+			return tcpVerdictDropStream
+		}
+		return tcpVerdictAccept
 	default:
 		// Should never happen
 		return tcpVerdictAcceptStream
